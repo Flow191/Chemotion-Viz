@@ -1,4 +1,5 @@
 library(classyfireR)
+library(tidyverse)
 
 # Einlesen der txt-Datei mit den InChiKeys
 data <- read_table("Data/InChiKeys.txt")
