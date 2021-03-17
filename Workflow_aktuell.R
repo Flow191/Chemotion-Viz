@@ -22,19 +22,17 @@ inchikey <- sapply(smiles, get.inchi.key)
 # InChIKeys benutzen um zu klassifizieren
 Classification_List <- purrr::map(inchikey, get_classification)
 
-# Zugriff auf die class der 1. Substanz
-Classification_List[[1]]@classification[["Classification"]][3]
+# Klassifizierungsgrad angeben: 
+# "kingdom"=1; "superclass"=2; "class"=3; "subclass"=4 
+level=3
 
-# Schleife in der die class der ersten 10 Substanzen angezeigt wird
-# NULL = leeres Objekt (zum Beispiel der "Datentyp" einer Funktion ohne Rückgabewert)
-# Fehler: trying to get slot "classification" from an object of a basic class 
-# ("NULL") with no slots
-for (i in 15:16) {
-  print(Classification_List[[i]]@classification[["Classification"]][3])
+# Schleife in der die class aller Substanzen angezeigt wird
+class <- vector("character", 2343)
+for (i in 1:length(Classification_List[])) {
+  if( is.null(Classification_List[[i]]) == 'TRUE') { 
+  } else { 
+    class[i] <- Classification_List[[i]]@classification[["Classification"]][level]}
 }
-
-# Schleife in der das Objekt der ersten 10 Substanzen angezeigt wird
-for (i in 1:10) {
-  print(Classification_List[[i]])
-}
-
+class[class==""] <- NA
+class_no_NA <- class[!is.na(class)]
+class_sorted <- sort(class_no_NA)
