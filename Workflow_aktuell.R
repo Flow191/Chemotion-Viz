@@ -33,6 +33,12 @@ for (i in 1:length(Classification_List[])) {
   } else { 
     class[i] <- Classification_List[[i]]@classification[["Classification"]][level]}
 }
+
+# Leere Strings als NA markieren und entfernen
 class[class==""] <- NA
-class_no_NA <- class[!is.na(class)]
-class_sorted <- sort(class_no_NA)
+class[!is.na(class)]
+
+# Sortieren und zählen der classes
+class_sorted <- sort(class)
+df <- data.frame(class_sorted)
+count(df,class_sorted)
