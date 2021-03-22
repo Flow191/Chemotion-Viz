@@ -1,0 +1,68 @@
+---
+title: "Chemotion-Viz"
+author: "Florian Schmidt"
+output:
+  html_document:
+    df_print: paged
+---
+```{r include=FALSE}
+knitr::read_chunk('Knitr_Workflow.R')
+```
+
+Aufgabe ist es aus der Chemotion Repository (https://www.chemotion-repository.net/welcome) alle bisher hinterlegten Substanzen zu klassifizieren und eine deskriptive Statistik des erhaltenen Datensatzes anzufertigen. Hierzu wird im Folgendem das verwendete R-Script beschrieben.
+
+Im ersten Schritt werden die benötigten Pakete geladen:
+```{r packages, message=FALSE}
+```
+
+Die benötigten canonical smiles der Substanzen aus der Chemotion Repository können als XLSX-Datei heruntergeladen werden. Hierfür wird ein Account benötigt. Unter dem Reiter "My DB" können unter "Chemotion" alle bisher eingetragenen Substanzen markiert und dann als XLSX-Datei exportiert werden. 
+In der XLSX-Datei befinden sich anschließend noch Duplikate, sowie Lösungsmittel (solvents) und Reaktionspartner (reactants). Nach Entfernung dieser Substanzen wird die XLSX-Datei in eine CSV-Datei konvertiert und kann dann in R eingelesen werden:
+```{r smiles, results='hide'}
+```
+
+Ausgabe der ersten 5 canonical smiles:
+
+[1] "NNc1ccc(cc1)Br.Cl"                                                                  
+[2] "CC1=Nc2c(C1(C)C)cc(cc2)/C=C/C(C(C(C(C(C(C(F)(F)F)(F)F)(F)F)(F)F)(F)F)(F)F)(F)F"     
+[3] "C[N+]1=C(C)C(c2c1ccc(c2)/C=C/C(C(C(C(F)(F)F)(F)F)(F)F)(F)F)(C)C.[I-]"               
+[4] "CC1=Nc2c(C1(C)C)cc(cc2)/C=C/C(C(C(C(F)(F)F)(F)F)(F)F)(F)F"                          
+[5] "C[N+]1=C(C)C(c2c1ccc(c2)/C=C/C(C(C(C(C(C(F)(F)F)(F)F)(F)F)(F)F)(F)F)(F)F)(C)C.[I-]" 
+
+Mit dem Paket "rinchi" (https://rdrr.io/github/CDK-R/rinchi/man/getinchi.html#heading-0) werden nun die canonical smiles in InChikeys konvertiert:
+```{r smiles_to_InChiKey}
+```
+
+Im nächsten Schritt werden die InChiKeys verwendet, um eine Klassifizierung der Substanzen durchzuführen. Die Klassifizierung erfolgt mit dem Paket "classyfireR" (https://github.com/aberHRML/classyfireR). Die Funktion "get_classification" erzeugt eine Klassifizierungsliste. In dieser wird für jede Substanz ein Objekt welches Listen mit Tibbles enthält angelegt. Aus diesem Objekt können dann zum Beispiel Metadaten und die Klassifizierungstabelle ausgelesen werden. Auch für Substanzen die nicht klassifiziert werden konnten wird ein Objekt vom Typ "NULL" erzeugt
+```{r classification, message=FALSE}
+```
+
+Die Ausgabe für die ersten 5 Substanzen:
+
+✔ RGGOWBBBHWTTRE-UHFFFAOYSA-N                                                            
+✖ ZUUYGWSDFRSKRQ-VOTSOKGWSA-N                                                            
+✖ YEYQPMMYRPDCKG-USRGLUTNSA-M                                                            
+✖ CKIZWXHHPDAWDC-VOTSOKGWSA-N                                                            
+✖ JMIIRMHBYMHNBB-USRGLUTNSA-M                                                            
+
+Nun kann der gewünschte Klassifizierungsgrad ausgewählt werden ("kingdom"=1; "superclass"=2; "class"=3; "subclass"=4):
+
+```{r level}
+```
+
+Zum Auslesen des Klassifizierungsgrades wird eine For-Schleife genutzt. Für diese wird zunächst ein leerer Vektor mit der Länge der erzeugten Klassifizierungsliste erzeugt. Die For-Schleife iteriert über die einzelnen Objekte der Klassifizierungsliste, um den gewünschten Klassifizierungsgrad auszulesen. Mit einer If-Bedingung werden Objekte abgefangen, die vom Typ "NULL" sind. Die Schleife füllt den zuvor erzeugten leeren Vektor mit den Klassifizierungsgrad der jeweiligen Substanz:
+```{r loop}
+```
+
+Im nächsten Schritt werden die Zeilen mit den leeren Strings in "NA" überführt und dann aus dem Vektor entfernt:
+```{r null, results='hide'}
+```
+
+Anschließend wird das Klassifizierungslevel der Substanzen alphabetisch sortiert, in einen Data Frame geschrieben und ausgezählt.
+```{r sort}
+```
+
+Der erzeugte Data Frame wird benutzt um eine deskriptive Statistik des Datensatzes durchzuführen. 
+
+Darstellung des Klassifizierungslevel "class" aller klassifizierten Substanzen als Sunburst-Plot:
+```{r plot}
+```
