@@ -4,11 +4,8 @@ library(magrittr)
 library(classyfireR)
 library(dplyr)
 library(sunburstR)
-<<<<<<< HEAD
 library(Rcpp)
 library(RMassBank)
-=======
->>>>>>> 6eae06d65e2ec83e67357387857c30b008d52c84
 
 # Die erhaltene Exceldatei aus Chemotion Repository muss vor dem Start dieses
 # Skriptes leicht angepasst werden. Dazu zählt: 
@@ -55,12 +52,9 @@ n_classes <- count(df,class_sorted)
 
 # Ein erster Sunburst Plot
 sunburst(data = data.frame(n_classes), legend = FALSE)
-<<<<<<< HEAD
 
 # Smiles to Mass
 mass_func <- sapply(smiles, smiles2mass)
 df_mass <- data.frame(as.list(mass_func))
 substance_mass <- t(df_mass)
 mass <- data.frame(substance= row.names(substance_mass), substance_mass, row.names=NULL) 
-=======
->>>>>>> 6eae06d65e2ec83e67357387857c30b008d52c84
