@@ -7,6 +7,7 @@ library(dplyr)
 library(sunburstR)
 library(Rcpp)
 library(RMassBank)
+library(ggplot2)
 
 # ---- smiles ----
 smiles <- read.csv("~/R/Chemotion/Chemotion/Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5]
@@ -58,3 +59,12 @@ df_mass <- data.frame(as.list(mass_func))
 substance_mass <- t(df_mass)
 mass <- data.frame(substance= row.names(substance_mass), substance_mass, row.names=NULL)
 head(mass,3)
+
+#---- plot2 ----
+ggplot(mass,aes(substance,substance_mass))+
+  geom_col(color="darkblue")+
+  labs(title="Substance histogram plot",x="Substance", y = "Substance MW(g/mol)")
+
+ggplot(mass,aes(substance_mass))+
+  geom_histogram(binwidth=20,color="darkblue", fill="lightblue")+
+  labs(title="Molar mass histogram plot",x="MW(g/mol)", y = "Count")

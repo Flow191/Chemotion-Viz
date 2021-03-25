@@ -59,3 +59,7 @@ Mithilfe dieses Data Frames kann die Darstellung des Klassifizierungslevel "clas
 Neben der Darstellung der prozentualen Anteile der Substanzklassen können mithilfe des Paketes "RMassBank" (https://bioconductor.org/packages/release/bioc/html/RMassBank.html) die molaren Massen der Substanzen aus den canonical smiles berechnet werden. Der erstellte Data Frame zeigt die ersten drei Substanzen aus dem Datensatz mit der jeweiligen molaren Masse [g/mol] an.
 ```{r smiles2mass}
 ```
+
+Mit dem Paket "ggplot2" (https://www.rdocumentation.org/packages/ggplot2/versions/3.3.3) können die Substanzen mit der dazugehörigen molaren Masse dargestellt werden. 
+```{r plot2}
+```

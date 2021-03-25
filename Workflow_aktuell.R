@@ -6,6 +6,7 @@ library(dplyr)
 library(sunburstR)
 library(Rcpp)
 library(RMassBank)
+library(ggplot2)
 
 # Die erhaltene Exceldatei aus Chemotion Repository muss vor dem Start dieses
 # Skriptes leicht angepasst werden. Dazu zählt: 
@@ -58,3 +59,12 @@ mass_func <- sapply(smiles, smiles2mass)
 df_mass <- data.frame(as.list(mass_func))
 substance_mass <- t(df_mass)
 mass <- data.frame(substance= row.names(substance_mass), substance_mass, row.names=NULL) 
+
+# Plot MW 
+ggplot(mass,aes(substance,substance_mass))+
+  geom_col(color="darkblue")+
+  labs(title="Substance histogram plot",x="Substance", y = "Substance MW(g/mol)")
+
+ggplot(mass,aes(substance_mass))+
+  geom_histogram(binwidth=20,color="darkblue", fill="lightblue")+
+  labs(title="Molar mass histogram plot",x="MW(g/mol)", y = "Count")
