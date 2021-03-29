@@ -44,7 +44,7 @@ Im nächsten Schritt werden die leeren Strings aus dem class-Vektor in "NA" übe
 ```{r null, results='hide'}
 ```
 
-Anschließend wird der Klassifizierungsgrad der Substanzen alphabetisch sortiert, in einen Data Frame geschrieben und ausgezählt. Die Ausgabe ist dann ein Data Frame mit den alphabetisch sortierten Substanzklassen und der Anzahl dieser im Datensatz.
+Anschließend wird der Klassifizierungsgrad der Substanzen alphabetisch sortiert, in einen Data Frame geschrieben und ausgezählt. Die Ausgabe ist dann ein Data Frame mit den alphabetisch sortierten Substanzklassen und der Anzahl dieser im Datensatz. Substanzklassen, die in ihrem Namen einen Bindestrich haben, werden im folgenden Sunburst-Plot nicht richtig geplotted, deshalb werden die Bindestriche in Unterstriche umgewandelt.
 ```{r sort}
 ```
 
@@ -56,10 +56,10 @@ Mithilfe dieses Data Frames kann die Darstellung des Klassifizierungslevel "clas
 ```{r plot}
 ```
 
-Neben der Darstellung der prozentualen Anteile der Substanzklassen können mithilfe des Paketes "RMassBank" (https://bioconductor.org/packages/release/bioc/html/RMassBank.html) die molaren Massen der Substanzen aus den canonical smiles berechnet werden. Der erstellte Data Frame zeigt die ersten drei Substanzen aus dem Datensatz mit der jeweiligen molaren Masse [g/mol] an.
+Neben der Darstellung der prozentualen Anteile der Substanzklassen können mithilfe des Paketes "RMassBank" (https://bioconductor.org/packages/release/bioc/html/RMassBank.html) die molaren Massen der Substanzen aus den canonical smiles berechnet werden. Der erstellte Data Frame zeigt die ersten drei Substanzen aus dem Datensatz mit der jeweiligen exakten molaren Masse [g/mol] an.
 ```{r smiles2mass}
 ```
 
-Mit dem Paket "ggplot2" (https://www.rdocumentation.org/packages/ggplot2/versions/3.3.3) können die Substanzen mit der dazugehörigen molaren Masse dargestellt werden. 
+Mit dem Paket "ggplot2" (https://www.rdocumentation.org/packages/ggplot2/versions/3.3.3) können die Substanzen mit der dazugehörigen molaren Masse dargestellt werden und mit dem Paket "ggplotly" (https://www.rdocumentation.org/packages/plotly/versions/4.9.3/topics/ggplotly) werden die Grafiken interaktiv dargestellt.
 ```{r plot2}
 ```
