@@ -68,3 +68,5 @@ ggplot(mass,aes(substance,substance_mass))+
 ggplot(mass,aes(substance_mass))+
   geom_histogram(binwidth=20,color="darkblue", fill="lightblue")+
   labs(title="Molar mass histogram plot",x="MW(g/mol)", y = "Count")
+
+#Test
