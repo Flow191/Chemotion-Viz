@@ -9,6 +9,7 @@ library(Rcpp)
 library(RMassBank)
 library(ggplot2)
 library(plotly)
+library(metfRag)
 
 # ---- smiles ----
 smiles <- read.csv("~/R/Chemotion/ChemotionViz/Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5]
@@ -47,7 +48,7 @@ class[!is.na(class)]
 class_sorted <- sort(class)
 class_dash <- gsub("-", "_", class_sorted)
 df <- data.frame(class_dash)
-(n_classes <- count(df,class_dash))
+(n_classes <- dplyr::count(df,class_dash))
 
 # ---- n_substances_class ----
 sum(n_classes$n)
@@ -71,3 +72,8 @@ histogram <- ggplot(mass,aes(substance_mass))+
   labs(title="Histogram plot: Molar mass vs count",x="Exact mass (g/mol)", y = "Count")
 
 ggplotly(histogram)
+
+#---- clustering ----
+mols <- parse.smiles(smiles)
+dummy <- mapply(set.property, mols, "Score", c(1:2343))
+plotCluster(mols, h=0.2)

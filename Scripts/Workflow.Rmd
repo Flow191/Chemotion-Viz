@@ -63,3 +63,9 @@ Neben der Darstellung der prozentualen Anteile der Substanzklassen können mithi
 Mit dem Paket "ggplot2" (https://www.rdocumentation.org/packages/ggplot2/versions/3.3.3) können die Substanzen mit der dazugehörigen molaren Masse dargestellt werden und mit dem Paket "ggplotly" (https://www.rdocumentation.org/packages/plotly/versions/4.9.3/topics/ggplotly) werden die Grafiken interaktiv dargestellt.
 ```{r plot2}
 ```
+
+Beispiel-Plot eines hierarchischen Clusterings der Substanzen mit dem Paket 'metfRag':
+```{r clustering}
+
+```
+

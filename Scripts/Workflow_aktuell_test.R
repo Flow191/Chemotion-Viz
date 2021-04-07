@@ -8,6 +8,19 @@ library(Rcpp)
 library(RMassBank)
 library(ggplot2)
 library(plotly)
+library(rcdk)
+library(metfRag)
+
+
+library(ggfortify)
+d <- iris[1:4]
+pca_res <- prcomp(d, scale. = TRUE)
+mtcars
+
+autoplot(pca_res, data = iris, colour = 'Species',
+         loadings = TRUE, loadings.colour = 'blue',
+         loadings.label = TRUE, loadings.label.size = 3)
+
 
 # Die erhaltene Exceldatei aus Chemotion Repository muss vor dem Start dieses
 # Skriptes leicht angepasst werden. Dazu zählt: 
@@ -51,7 +64,7 @@ class[!is.na(class)]
 class_sorted <- sort(class)
 class_dash <- gsub("-", "_", class_sorted)
 df <- data.frame(class_dash)
-n_classes <- count(df,class_dash)
+n_classes <- dplyr::count(df,class_dash)
 
 # Ein erster Sunburst Plot
 sunburst(data = data.frame(n_classes), legend = FALSE)
@@ -71,6 +84,11 @@ g <- ggplot(mass,aes(substance_mass))+
   labs(title="Molar mass histogram plot",x="MW(g/mol)", y = "Count")
 
 ggplotly(g)
+
+#hierarische Clustering:
+mols <- parse.smiles(smiles)
+dummy <- mapply(set.property, mols, "Score", c(1:2343))
+plotCluster(mols, h=0.2)
 ########################################################################################
 
 # Schleife in der die class der ersten 10 Substanzen angezeigt wird
