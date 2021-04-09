@@ -92,6 +92,18 @@ library(plyr)
 ff$classes <- gsub('; NA','', paste(ff$"1",ff$"2",ff$"3", ff$"4", ff$"5", ff$"6", ff$"7",ff$"8" ,sep = "; "))
 ff <- ff[ff$class!='NA',]
 ff<-ddply(ff,.(classes),summarize, count=length(classes) )
+#newdata <- ff[ !(ff$classes %in% 1), ]
+#newdata <- subset(ff, id= 1)
+fff <- ff[-1, ] 
+fff$classes <- gsub('-','_',fff$classes)
+fff$classes <- gsub(';','-',fff$classes)
+
+
+#library(dplyr)
+#library(string)
+#df %>% mutate(across(everything(),~ replace_na(., ''))) %>% 
+#  mutate(classes = trimws(paste("1","2","3","4","5","6","7","8", sep = ';'),whitespace = "''"), classes = str_remove(classes, ';+$')) %>% 
+#  count(classes, name = 'count') %>% filter(!str_detect(classes,'^$'))
 
 
 ##################################################################################
@@ -149,7 +161,7 @@ n_classesx <- dplyr::count(dfx,class_dashx)
 # Ein erster Sunburst Plot
 sunburst(data = data.frame(n_classes), legend = FALSE)
 
-sunburst(data = ff, legend = FALSE)
+sunburst(data = fff, legend = FALSE)
 
 # Smiles to Mass
 substance_mass <- sapply(smiles, smiles2mass)
