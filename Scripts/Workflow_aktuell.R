@@ -76,4 +76,6 @@ ggplotly(histogram)
 # Hierarisches Clustering
 mols <- parse.smiles(smiles)
 dummy <- mapply(set.property, mols, "Score", c(1:2343))
+vect <- sprintf("C%d", 1:2343)
+dummy <- mapply(set.property, mols, "Identifier", c(vect))
 plotCluster(mols, h=0.2)

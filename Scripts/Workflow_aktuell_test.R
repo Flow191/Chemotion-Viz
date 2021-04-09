@@ -43,16 +43,74 @@ Classification_List <- sapply(inchikey, get_classification)
 # Klassifizierungsgrad angeben: 
 # "kingdom"=1; "superclass"=2; "class"=3; "subclass"=4 
 level=3
+levelx=4
 
 # Schleife in der die class aller Substanzen angezeigt wird
 class <- vector("character", length(Classification_List[]))
 for (i in 1:length(Classification_List[])) {
   if( is.null(Classification_List[[i]]) == 'TRUE') { 
   } 
-  else if (is.null(Classification_List[[i]]@classification[["Classification"]][level]) == 'TRUE'){
+  else if (is.null(Classification_List[[i]]@classification[["Classification"]][c(level)]) == 'TRUE'){
   }
   else { 
-    class[i] <- Classification_List[[i]]@classification[["Classification"]][level]
+    class[i] <- Classification_List[[i]]@classification[["Classification"]][c(level)]
+  }
+}
+
+classy <- vector()
+for (i in 1:length(Classification_List[])) {
+  if( is.null(Classification_List[[i]]) == 'TRUE') { 
+  } 
+  else if (is.null(Classification_List[[i]]@classification[["Classification"]][c(1:4)]) == 'TRUE'){
+  }
+  else { 
+    classy[i] <- Classification_List[[i]]@classification[["Classification"]][c(1:4)]
+  }
+}
+#######################################################################
+# Exktraktion der Classifikation aus Objekt:
+classz <- vector("character", length(Classification_List[]))
+for (i in 1:length(Classification_List[])) {
+  if( is.null(Classification_List[[i]]) == 'TRUE') { 
+  } 
+  else if (is.null(Classification_List[[i]]@classification[["Classification"]][1]) == 'TRUE'){
+  }
+  else { 
+    #classz[i] <- classification(Classification_List[[i]])
+    classz[i] <-as.data.frame(Classification_List[[i]]@classification[["Classification"]])
+  }
+}
+
+# Liste der Classifikationen als df:
+ff <- plyr::ldply(classz, rbind)
+
+# Zeigt wie viele Substancen bis bestimmten Level klassifiziert wurden:
+d <- ff[complete.cases(ff$`7`), ]
+
+# Formatierung des DF
+library(plyr)
+ff$classes <- gsub('; NA','', paste(ff$"1",ff$"2",ff$"3", ff$"4", ff$"5", ff$"6", ff$"7",ff$"8" ,sep = "; "))
+ff <- ff[ff$class!='NA',]
+ff<-ddply(ff,.(classes),summarize, count=length(classes) )
+
+
+##################################################################################
+
+classification(Classification_List[["NNc1ccc(cc1)Br.Cl"]])
+
+Classification_List[["NNc1ccc(cc1)Br.Cl"]]@classification[["Classification"]][c(1:4)]
+
+
+as.data.frame(Classification_List[["NNc1ccc(cc1)Br.Cl"]]@classification[["Classification"]])
+
+classx <- vector("character", length(Classification_List[]))
+for (i in 1:length(Classification_List[])) {
+  if( is.null(Classification_List[[i]]) == 'TRUE') { 
+  } 
+  else if (is.null(Classification_List[[i]]@classification[["Classification"]][levelx]) == 'TRUE'){
+  }
+  else { 
+    classx[i] <- Classification_List[[i]]@classification[["Classification"]][levelx]
   }
 }
 
@@ -60,14 +118,38 @@ for (i in 1:length(Classification_List[])) {
 class[class==""] <- NA
 class[!is.na(class)]
 
+classx[classx==""] <- NA
+classx[!is.na(classx)]
+
+dfy <- data.frame(class,classx)
+dfy$Classifier.classes = paste(dfy$class, dfy$classx, sep="-")
+dfff = subset(dfy, select = -c(class,classx))
+n_classesdfy <- dplyr::count(dfff,Classifier.classes)
+
+he <- dfy[!is.na(dfy)]
+
+class_dashx <- gsub("-", "_", dfy)
+n_classesdfy <- dplyr::count(dfy,class)
+n_classesdfy2 <- dplyr::count(dfy,classx)
+l <- data.frame(n_classesdfy,dfy)
+names(dfy) <- c("class","subclass")
+print(dfy)
+
 # Sortieren und zählen der classes
 class_sorted <- sort(class)
 class_dash <- gsub("-", "_", class_sorted)
 df <- data.frame(class_dash)
 n_classes <- dplyr::count(df,class_dash)
 
+class_sortedx <- sort(classx)
+class_dashx <- gsub("-", "_", class_sortedx)
+dfx <- data.frame(class_dashx)
+n_classesx <- dplyr::count(dfx,class_dashx)
+
 # Ein erster Sunburst Plot
 sunburst(data = data.frame(n_classes), legend = FALSE)
+
+sunburst(data = ff, legend = FALSE)
 
 # Smiles to Mass
 substance_mass <- sapply(smiles, smiles2mass)
