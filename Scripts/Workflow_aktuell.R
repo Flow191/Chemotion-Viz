@@ -3,6 +3,7 @@ library(rinchi)
 library(magrittr)
 library(classyfireR)
 library(dplyr)
+library(plyr)
 library(sunburstR)
 library(Rcpp)
 library(RMassBank)
@@ -28,34 +29,34 @@ inchikey <- sapply(smiles, get.inchi.key)
 # InChIKeys benutzen um zu klassifizieren
 Classification_List <- sapply(inchikey, get_classification)
 
-# Klassifizierungsgrad angeben: 
-# "kingdom"=1; "superclass"=2; "class"=3; "subclass"=4 
-level=3
-
-# Schleife in der die class aller Substanzen angezeigt wird
+# Schleife in der die classes aller Substanzen als Liste angezeigt wird
 class <- vector("character", length(Classification_List[]))
 for (i in 1:length(Classification_List[])) {
   if( is.null(Classification_List[[i]]) == 'TRUE') { 
   } 
-  else if (is.null(Classification_List[[i]]@classification[["Classification"]][level]) == 'TRUE'){
+  else if (is.null(Classification_List[[i]]@classification[["Classification"]][1]) == 'TRUE'){
   }
   else { 
-    class[i] <- Classification_List[[i]]@classification[["Classification"]][level]
+    class[i] <-as.data.frame(Classification_List[[i]]@classification[["Classification"]])
   }
 }
 
-# Leere Strings als NA markieren und entfernen
-class[class==""] <- NA
-class[!is.na(class)]
+# Klassifikationen der Substanzen als Datenframe:
+df <- plyr::ldply(class, rbind)
 
-# Sortieren und zählen der classes
-class_sorted <- sort(class)
-class_dash <- gsub("-", "_", class_sorted)
-df <- data.frame(class_dash)
-n_classes <- dplyr::count(df,class_dash)
+# Zeigt wie viele Substancen bis bestimmten Level klassifiziert wurden:
+# substances_per_class<- df[complete.cases(df$`7`), ]
 
-# Ein erster Sunburst Plot
-sunburst(data = data.frame(n_classes), legend = FALSE)
+# Formatierung des Datenframes für den Sunburst-Plot:
+df$classes <- gsub('; NA','', paste(df$"1",df$"2",df$"3", df$"4", df$"5", df$"6", df$"7",df$"8" ,sep = "; "))
+df <- df[df$classes!='NA',]
+df <-ddply(df,.(classes),summarize, count=length(classes) )
+df <- df[-1, ] 
+df$classes <- gsub('-','_',df$classes)
+df$classes <- gsub(';','-',df$classes)
+
+# Sunburst Plot der Substanzklassen:
+sunburst(data = data.frame(df), legend = FALSE)
 
 # Smiles to Mass
 substance_mass <- sapply(smiles, smiles2mass)
