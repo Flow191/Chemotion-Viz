@@ -3,6 +3,7 @@ library(readr)
 library(rinchi)
 library(magrittr)
 library(classyfireR)
+library(plyr)
 library(dplyr)
 library(sunburstR)
 library(Rcpp)
@@ -22,39 +23,37 @@ inchikey <-sapply(smiles, get.inchi.key)
 Classification_List <- sapply(inchikey, get_classification)
 head(Classification_List,3)
 
-# ---- level ----
-level=3
-
 # ---- loop ----
 class <- vector("character", length(Classification_List[]))
 for (i in 1:length(Classification_List[])) {
   if( is.null(Classification_List[[i]]) == 'TRUE') { 
   } 
-  else if (is.null(Classification_List[[i]]@classification[["Classification"]][level]) == 'TRUE'){
+  else if (is.null(Classification_List[[i]]@classification[["Classification"]][1]) == 'TRUE'){
   }
   else { 
-    class[i] <- Classification_List[[i]]@classification[["Classification"]][level]
+    class[i] <-as.data.frame(Classification_List[[i]]@classification[["Classification"]])
   }
 }
 
 # ---- n_substances ----
 i
 
-# ---- null ----
-class[class==""] <- NA
-class[!is.na(class)]
+# ---- dataframe ---- 
+df <- plyr::ldply(class, rbind)
+df
 
-# ---- sort ----
-class_sorted <- sort(class)
-class_dash <- gsub("-", "_", class_sorted)
-df <- data.frame(class_dash)
-(n_classes <- dplyr::count(df,class_dash))
+# ---- formatting ----
+df$classes <- gsub('; NA','', paste(df$"1",df$"2",df$"3", df$"4", df$"5", df$"6", df$"7",df$"8" ,sep = "; "))
+df <-ddply(df,.(classes),summarize, count=length(classes) )
+df <- df[-1, ] 
+df$classes <- gsub('-','_',df$classes)
+df$classes <- gsub(';','-',df$classes)
 
 # ---- n_substances_class ----
-sum(n_classes$n)
+sum(df$count)
 
-# ---- plot ----
-sunburst(data = data.frame(n_classes), legend = FALSE)
+# ---- sunburst ----
+sunburst(df, legend = FALSE)
 
 # ---- smiles2mass ----
 substance_mass <- sapply(smiles, smiles2mass)

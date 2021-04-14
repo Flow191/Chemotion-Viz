@@ -28,11 +28,7 @@ Im nächsten Schritt werden die InChiKeys verwendet, um eine Klassifizierung der
 ```{r classification, message=FALSE}
 ```
 
-Nun kann der gewünschte Klassifizierungsgrad der Substanzen ausgewählt werden, hier level="class" ("kingdom"=1; "superclass"=2; "class"=3; "subclass"=4).
-```{r level}
-```
-
-Zum Auslesen des Klassifizierungsgrades wird eine For-Schleife genutzt. Für diese wird zunächst ein leerer Vektor mit der Länge der erzeugten Klassifizierungsliste erzeugt. Die For-Schleife iteriert über die einzelnen Objekte der Klassifizierungsliste, um den gewünschten Klassifizierungsgrad auszulesen. Mit einer If-Bedingung werden Objekte abgefangen, die vom Typ "NULL" sind. Die Schleife füllt den zuvor erzeugten leeren Vektor mit den Klassifizierungsgrad der jeweiligen Substanz.
+Zum Auslesen der Substanzklassen wird eine For-Schleife genutzt. Für diese wird zunächst ein leerer Vektor mit der Länge der erzeugten Klassifizierungsliste erzeugt. Die For-Schleife iteriert über die einzelnen Objekte der Klassifizierungsliste, um die Klassifizierungsgrade aller Substanzen auszulesen. Mit einer If-Bedingung werden Objekte abgefangen, die vom Typ "NULL" sind. Die Schleife füllt den zuvor erzeugten leeren Vektor mit den Klassifizierungsgraden der jeweiligen Substanz. Die Ausgabe ist eine Liste mit allen klassifizierten Substanzen und deren hierarischen Klassifizierung.
 ```{r loop}
 ```
 
@@ -40,12 +36,12 @@ Anzahl der zu klassifizierenden Substanzen aus der Chemotion Repository (Größe
 ```{r n_substances, echo=FALSE}
 ```
 
-Im nächsten Schritt werden die leeren Strings aus dem class-Vektor in "NA" überführt und dann entfernt.
-```{r null, results='hide'}
+Umwandlung der Substanzklassen als Datenframe:
+```{r dataframe}
 ```
 
-Anschließend wird der Klassifizierungsgrad der Substanzen alphabetisch sortiert, in einen Data Frame geschrieben und ausgezählt. Die Ausgabe ist dann ein Data Frame mit den alphabetisch sortierten Substanzklassen und der Anzahl dieser im Datensatz. Substanzklassen, die in ihrem Namen einen Bindestrich haben, werden im folgenden Sunburst-Plot nicht richtig geplotted, deshalb werden die Bindestriche in Unterstriche umgewandelt.
-```{r sort}
+In dem erzeugten Dataframe stehen in den Spalten der jeweilige Klassifizierungsgrad und in den Reihen die jeweilige Substanz. Im ersten Schritt wird eine neue Spalte "classes" erzeugt, in der alle Spalten mit den Klassifizierungsgraden einer Substanz zusammengefasst werden und mit einem Semikolon getrennt werden. Im nächsten Schritt werden alle SPalten, außer die "classes"-Spalte gelöscht und die hierarisch angelegten Substanzklassen nach Anzahl aufsummiert. Klassifizierungsgrade, die in ihrem Namen einen Bindestrich haben, werden im folgenden Sunburst-Plot nicht richtig geplotted, deshalb werden die Bindestriche in Unterstriche umgewandelt.
+```{r formatting}
 ```
 
 Anzahl der erfolgreich klassifizierten Substanzen aus der Chemotion Repository:
@@ -53,7 +49,7 @@ Anzahl der erfolgreich klassifizierten Substanzen aus der Chemotion Repository:
 ```
 
 Mithilfe dieses Data Frames kann die Darstellung des Klassifizierungslevel "class" aller klassifizierten Substanzen prozentual als Sunburst-Plot erfolgen. Die Erstellung des Sunburst Plots erfolgte mit dem Paket "sunburstR" (https://github.com/timelyportfolio/sunburstR)
-```{r plot}
+```{r sunburst,error=TRUE}
 ```
 
 Neben der Darstellung der prozentualen Anteile der Substanzklassen können mithilfe des Paketes "RMassBank" (https://bioconductor.org/packages/release/bioc/html/RMassBank.html) die molaren Massen der Substanzen aus den canonical smiles berechnet werden. Der erstellte Data Frame zeigt die ersten drei Substanzen aus dem Datensatz mit der jeweiligen exakten molaren Masse [g/mol] an.

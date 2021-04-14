@@ -94,9 +94,9 @@ ff <- ff[ff$class!='NA',]
 ff<-ddply(ff,.(classes),summarize, count=length(classes) )
 #newdata <- ff[ !(ff$classes %in% 1), ]
 #newdata <- subset(ff, id= 1)
-fff <- ff[-1, ] 
-fff$classes <- gsub('-','_',fff$classes)
-fff$classes <- gsub(';','-',fff$classes)
+ff <- ff[-1, ] 
+ff$classes <- gsub('-','_',fff$classes)
+ff$classes <- gsub(';','-',fff$classes)
 
 
 #library(dplyr)
