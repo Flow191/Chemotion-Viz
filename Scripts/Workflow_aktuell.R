@@ -49,7 +49,6 @@ df <- plyr::ldply(class, rbind)
 
 # Formatierung des Datenframes für den Sunburst-Plot:
 df$classes <- gsub('; NA','', paste(df$"1",df$"2",df$"3", df$"4", df$"5", df$"6", df$"7",df$"8" ,sep = "; "))
-#df <- df[df$classes!='NA',]
 df <-ddply(df,.(classes),summarize, count=length(classes) )
 df <- df[-1, ] 
 df$classes <- gsub('-','_',df$classes)
