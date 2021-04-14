@@ -2,8 +2,8 @@ library(readr)
 library(rinchi)
 library(magrittr)
 library(classyfireR)
-library(dplyr)
 library(plyr)
+library(dplyr)
 library(sunburstR)
 library(Rcpp)
 library(RMassBank)
@@ -49,14 +49,14 @@ df <- plyr::ldply(class, rbind)
 
 # Formatierung des Datenframes für den Sunburst-Plot:
 df$classes <- gsub('; NA','', paste(df$"1",df$"2",df$"3", df$"4", df$"5", df$"6", df$"7",df$"8" ,sep = "; "))
-df <- df[df$classes!='NA',]
+#df <- df[df$classes!='NA',]
 df <-ddply(df,.(classes),summarize, count=length(classes) )
 df <- df[-1, ] 
 df$classes <- gsub('-','_',df$classes)
 df$classes <- gsub(';','-',df$classes)
 
 # Sunburst Plot der Substanzklassen:
-sunburst(data = data.frame(df), legend = FALSE)
+sunburst(data = df, legend = FALSE)
 
 # Smiles to Mass
 substance_mass <- sapply(smiles, smiles2mass)
