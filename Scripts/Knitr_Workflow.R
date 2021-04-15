@@ -7,13 +7,14 @@ library(plyr)
 library(dplyr)
 library(sunburstR)
 library(Rcpp)
-library(RMassBank)
+library(rcdk)
 library(ggplot2)
 library(plotly)
 library(metfRag)
 
 # ---- smiles ----
 smiles <- read.csv("~/R/Chemotion/ChemotionViz/Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5]
+#smiles <- read.csv("../Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5]
 head(smiles,3)
 
 # ---- smiles_to_InChiKey ---- 
@@ -56,6 +57,14 @@ sum(df$count)
 sunburst(df, legend = FALSE)
 
 # ---- smiles2mass ----
+smiles2mass <- function(SMILES){
+  massfromformula <- parse.smiles(SMILES)[[1]]
+  do.typing(massfromformula)
+  do.aromaticity(massfromformula)
+  convert.implicit.to.explicit(massfromformula)
+  do.isotopes(massfromformula)
+  mass <- get.exact.mass(massfromformula)
+  return(mass)}
 substance_mass <- sapply(smiles, smiles2mass)
 df_mass <- data.frame(substance_mass)
 mass <- data.frame(substance= row.names(df_mass), df_mass, row.names=NULL)
