@@ -6,7 +6,7 @@ library(plyr)
 library(dplyr)
 library(sunburstR)
 library(Rcpp)
-library(RMassBank)
+library(rcdk)
 library(ggplot2)
 library(plotly)
 library(metfRag)
@@ -23,7 +23,6 @@ library(metfRag)
 smiles <- read.csv("Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5]
 
 # Umwandlung von Smiles zu InChiKey
-# https://rdrr.io/github/CDK-R/rinchi/man/getinchi.html#heading-0
 inchikey <- sapply(smiles, get.inchi.key)
 
 # InChIKeys benutzen um zu klassifizieren
@@ -58,6 +57,14 @@ df$classes <- gsub(';','-',df$classes)
 sunburst(data = df, legend = FALSE)
 
 # Smiles to Mass
+smiles2mass <- function(SMILES){
+  massfromformula <- parse.smiles(SMILES)[[1]]
+  do.typing(massfromformula)
+  do.aromaticity(massfromformula)
+  convert.implicit.to.explicit(massfromformula)
+  do.isotopes(massfromformula)
+  mass <- get.exact.mass(massfromformula)
+  return(mass)}
 substance_mass <- sapply(smiles, smiles2mass)
 df_mass <- data.frame(substance_mass)
 mass <- data.frame(substance= row.names(df_mass), df_mass, row.names=NULL)

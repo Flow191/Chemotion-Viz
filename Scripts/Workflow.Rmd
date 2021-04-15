@@ -7,6 +7,7 @@ output:
 ---
 ```{r include=FALSE}
 knitr::read_chunk('Knitr_Workflow.R')
+#source("viz-helper.R")
 ```
 
 Aufgabe ist es aus der Chemotion Repository (https://www.chemotion-repository.net/welcome) alle bisher hinterlegten Substanzen zu klassifizieren und eine deskriptive Statistik des erhaltenen Datensatzes anzufertigen. Hierzu wird im Folgendem das verwendete R-Script beschrieben.
@@ -26,8 +27,11 @@ Mit dem Paket "rinchi" (https://rdrr.io/github/CDK-R/rinchi/man/getinchi.html#he
 
 Im nächsten Schritt werden die InChiKeys verwendet, um eine Klassifizierung der Substanzen durchzuführen. Die Klassifizierung erfolgt mit dem Paket "classyfireR" (https://github.com/aberHRML/classyfireR). Die Funktion "get_classification" erzeugt eine Klassifizierungsliste. In dieser wird für jede Substanz ein Objekt welches Listen mit Tibbles enthält angelegt. Aus diesem Objekt können dann zum Beispiel Metadaten und die Klassifizierungstabelle ausgelesen werden (siehe folgende Ausgabe, Objekt 1). Für Substanzen die nicht klassifiziert werden konnten wird ein Objekt vom Typ "NULL" erzeugt (siehe folgende Ausgabe, Objekt 2+3).
 ```{r classification, message=FALSE}
+#Classification_List <- sapply(inchikey, get_classification)
+#head(Classification_List,3)
 ```
 
+(JSON Objekt aus Classyfiere in df umwandeln...)
 Zum Auslesen der Substanzklassen wird eine For-Schleife genutzt. Für diese wird zunächst ein leerer Vektor mit der Länge der erzeugten Klassifizierungsliste erzeugt. Die For-Schleife iteriert über die einzelnen Objekte der Klassifizierungsliste, um die Klassifizierungsgrade aller Substanzen auszulesen. Mit einer If-Bedingung werden Objekte abgefangen, die vom Typ "NULL" sind. Die Schleife füllt den zuvor erzeugten leeren Vektor mit den Klassifizierungsgraden der jeweiligen Substanz. Die Ausgabe ist eine Liste mit allen klassifizierten Substanzen und deren hierarischen Klassifizierung.
 ```{r loop}
 ```
@@ -60,7 +64,7 @@ Mit dem Paket "ggplot2" (https://www.rdocumentation.org/packages/ggplot2/version
 ```{r plot2}
 ```
 
-Beispiel-Plot eines hierarchischen Clusterings der Substanzen mit dem Paket 'metfRag':
+Beispiel-Plot eines hierarchischen Clusterings der Substanzen mit dem Paket 'metfRag'(https://github.com/ipb-halle/MetFragR):
 ```{r clustering}
 
 ```
