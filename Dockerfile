@@ -6,5 +6,5 @@ LABEL Description="Chemotion_viz R environment."
 
 RUN apt-get -y update && apt-get -y install wget default-jdk-headless
 
-ADD install.R /tmp
+ADD binder/install.R /tmp
 RUN R -e "source('/tmp/install.R')"
