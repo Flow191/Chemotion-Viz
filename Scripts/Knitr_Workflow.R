@@ -13,8 +13,8 @@ library(plotly)
 library(metfRag)
 
 # ---- smiles ----
-smiles <- read.csv("~/R/Chemotion/ChemotionViz/Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5]
-#smiles <- read.csv("../Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5]
+#smiles <- read.csv("~/R/Chemotion/ChemotionViz/Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5]
+smiles <- read.csv("../Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5]
 head(smiles,3)
 
 # ---- smiles_to_InChiKey ---- 
