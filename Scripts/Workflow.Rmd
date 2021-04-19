@@ -5,67 +5,101 @@ output:
   html_document:
     df_print: paged
 ---
-```{r include=FALSE}
-knitr::read_chunk('Knitr_Workflow.R')
-#source("viz-helper.R")
-```
-
 Aufgabe ist es aus der Chemotion Repository (https://www.chemotion-repository.net/welcome) alle bisher hinterlegten Substanzen zu klassifizieren und eine deskriptive Statistik des erhaltenen Datensatzes anzufertigen. Hierzu wird im Folgendem das verwendete R-Script beschrieben.
-
-Im ersten Schritt werden die benötigten Pakete geladen:
-```{r packages, message=FALSE}
+Zunächst wird ein R-Skript mit den benötigten Helfer-Funktionen eingelesen, in der benötigte Funktionen ausgelagert werden, um die Vignette übersichtlicher zu gestalten. 
+```{r}
+source("~/R/Chemotion/ChemotionViz/Scripts/viz-helper.R")
 ```
 
-Die benötigten canonical smiles der Substanzen aus der Chemotion Repository können als XLSX-Datei heruntergeladen werden. Hierfür muss ein Account auf der Homepage der Chemotion Repository angelegt werden. Unter dem Reiter "My DB" können unter "Chemotion" alle bisher eingetragenen Substanzen markiert und dann als XLSX-Datei exportiert werden. 
+Die benötigten Pakete müssen geladen werden:
+```{r, message=FALSE}
+library(readr)
+library(rinchi)
+library(magrittr)
+library(classyfireR)
+library(plyr)
+library(dplyr)
+library(sunburstR)
+library(Rcpp)
+library(rcdk)
+library(ggplot2)
+library(plotly)
+library(metfRag)
+```
+
+
+Die canonical smiles der Substanzen aus der Chemotion Repository (https://www.chemotion-repository.net/welcome) können als XLSX-Datei heruntergeladen werden. Hierfür muss ein Account auf der Homepage der Chemotion Repository angelegt werden. Unter dem Reiter "My DB" können unter "Chemotion" alle bisher eingetragenen Substanzen markiert und dann als XLSX-Datei exportiert werden. 
 In der heruntergeladenen XLSX-Datei befinden sich anschließend noch Duplikate, sowie Lösungsmittel (solvents) und Reaktionspartner (reactants). Nach Entfernung dieser Substanzen wird die XLSX-Datei in eine CSV-Datei konvertiert und kann dann in R eingelesen werden.
-```{r smiles}
+```{r}
+smiles <- as.character(read.csv("~/R/Chemotion/ChemotionViz/Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5])
+#smiles <- as.character(read.csv("~/R/Chemotion/ChemotionViz/Data/sample_export_test.csv")[ ,5])
+#smiles <- as.character(read.csv("../Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5])
+head(smiles,3)
 ```
 
 Mit dem Paket "rinchi" (https://rdrr.io/github/CDK-R/rinchi/man/getinchi.html#heading-0) werden nun die canonical smiles in InChikeys konvertiert, damit diese zur Klassifizierung notwenig sind.
-```{r smiles_to_InChiKey}
+```{r}
+inchikey <-sapply(smiles, get.inchi.key)
 ```
 
-Im nächsten Schritt werden die InChiKeys verwendet, um eine Klassifizierung der Substanzen durchzuführen. Die Klassifizierung erfolgt mit dem Paket "classyfireR" (https://github.com/aberHRML/classyfireR). Die Funktion "get_classification" erzeugt eine Klassifizierungsliste. In dieser wird für jede Substanz ein Objekt welches Listen mit Tibbles enthält angelegt. Aus diesem Objekt können dann zum Beispiel Metadaten und die Klassifizierungstabelle ausgelesen werden (siehe folgende Ausgabe, Objekt 1). Für Substanzen die nicht klassifiziert werden konnten wird ein Objekt vom Typ "NULL" erzeugt (siehe folgende Ausgabe, Objekt 2+3).
-```{r classification, message=FALSE}
-#Classification_List <- sapply(inchikey, get_classification)
-#head(Classification_List,3)
+Im nächsten Schritt werden die InChiKeys verwendet, um eine Klassifizierung der Substanzen durchzuführen. Die Klassifizierung erfolgt mit dem Paket "classyfireR" (https://github.com/aberHRML/classyfireR). Die Funktion "get_classification" erzeugt eine Klassifizierungsliste (JSON-Objekt). In dieser wird für jede Substanz ein Objekt welches Listen mit Tibbles enthält angelegt. Aus diesem Objekt können dann zum Beispiel Metadaten und die Klassifizierungstabelle ausgelesen werden (siehe folgende Ausgabe, Objekt 1). Für Substanzen die nicht klassifiziert werden konnten wird ein Objekt vom Typ "NULL" erzeugt (siehe folgende Ausgabe, Objekt 2+3).
+```{r, message=FALSE}
+Classification_List <- sapply(inchikey, get_classification)
+head(Classification_List,3)
 ```
 
-(JSON Objekt aus Classyfiere in df umwandeln...)
-Zum Auslesen der Substanzklassen wird eine For-Schleife genutzt. Für diese wird zunächst ein leerer Vektor mit der Länge der erzeugten Klassifizierungsliste erzeugt. Die For-Schleife iteriert über die einzelnen Objekte der Klassifizierungsliste, um die Klassifizierungsgrade aller Substanzen auszulesen. Mit einer If-Bedingung werden Objekte abgefangen, die vom Typ "NULL" sind. Die Schleife füllt den zuvor erzeugten leeren Vektor mit den Klassifizierungsgraden der jeweiligen Substanz. Die Ausgabe ist eine Liste mit allen klassifizierten Substanzen und deren hierarischen Klassifizierung.
-```{r loop}
+Das erhaltene JSON Objekt aus ClassyfierR muss so formatiert werden, dass am Ende ein Datenframe mit der hierarischen Klassifizierung der Substanzen ausgestattet ist. Hierzu wurde eine Funktion classyfire2df() geschrieben, die als Eingabe die Classification_List und als Ausgabe einen Datenframe hat:
+```{r}
+class <- vector("character", length(Classification_List[]))
+df <- classyfire2df()
+df
 ```
 
 Anzahl der zu klassifizierenden Substanzen aus der Chemotion Repository (Größe des Datensatzes):
-```{r n_substances, echo=FALSE}
-```
-
-Umwandlung der Substanzklassen als Datenframe:
-```{r dataframe}
+```{r, echo=FALSE}
+nrow(df)
 ```
 
 In dem erzeugten Dataframe stehen in den Spalten der jeweilige Klassifizierungsgrad und in den Reihen die jeweilige Substanz. Im ersten Schritt wird eine neue Spalte "classes" erzeugt, in der alle Spalten mit den Klassifizierungsgraden einer Substanz zusammengefasst werden und mit einem Semikolon getrennt werden. Im nächsten Schritt werden alle SPalten, außer die "classes"-Spalte gelöscht und die hierarisch angelegten Substanzklassen nach Anzahl aufsummiert. Klassifizierungsgrade, die in ihrem Namen einen Bindestrich haben, werden im folgenden Sunburst-Plot nicht richtig geplotted, deshalb werden die Bindestriche in Unterstriche umgewandelt.
-```{r formatting}
+```{r}
+df$classes <- gsub('; NA','', paste(df$"1",df$"2",df$"3", df$"4", df$"5", df$"6", df$"7",df$"8" ,sep = "; "))
+df <-ddply(df,.(classes),summarize, count=length(classes) )
+df <- df[-1, ] 
+df$classes <- gsub('-','_',df$classes)
+df$classes <- gsub(';','-',df$classes)
 ```
 
 Anzahl der erfolgreich klassifizierten Substanzen aus der Chemotion Repository:
-```{r n_substances_class, echo=FALSE}
+```{r, echo=FALSE}
+sum(df$count)
 ```
 
 Mithilfe dieses Data Frames kann die Darstellung des Klassifizierungslevel "class" aller klassifizierten Substanzen prozentual als Sunburst-Plot erfolgen. Die Erstellung des Sunburst Plots erfolgte mit dem Paket "sunburstR" (https://github.com/timelyportfolio/sunburstR)
-```{r sunburst,error=TRUE}
+```{r}
+sunburst(df, legend = FALSE)
 ```
 
-Neben der Darstellung der prozentualen Anteile der Substanzklassen können mithilfe des Paketes "RMassBank" (https://bioconductor.org/packages/release/bioc/html/RMassBank.html) die molaren Massen der Substanzen aus den canonical smiles berechnet werden. Der erstellte Data Frame zeigt die ersten drei Substanzen aus dem Datensatz mit der jeweiligen exakten molaren Masse [g/mol] an.
-```{r smiles2mass}
+Neben der Darstellung der prozentualen Anteile der Substanzklassen können mithilfe des Paketes "rcdk" (https://cran.r-project.org/web/packages/rcdk/index.html) die molaren Massen der Substanzen aus den canonical smiles berechnet werden. Der erstellte Dataframe zeigt die ersten drei Substanzen aus dem Datensatz mit der jeweiligen exakten molaren Masse [g/mol] an.
+```{r}
+substance_mass <- sapply(smiles, smiles2mass)
+df_mass <- data.frame(substance_mass)
+mass <- data.frame(substance= row.names(df_mass), df_mass, row.names=NULL)
+head(mass,3)
 ```
 
-Mit dem Paket "ggplot2" (https://www.rdocumentation.org/packages/ggplot2/versions/3.3.3) können die Substanzen mit der dazugehörigen molaren Masse dargestellt werden und mit dem Paket "ggplotly" (https://www.rdocumentation.org/packages/plotly/versions/4.9.3/topics/ggplotly) werden die Grafiken interaktiv dargestellt.
-```{r plot2}
+Mit dem Paket "ggplot2" (https://www.rdocumentation.org/packages/ggplot2/versions/3.3.3) kann ein Histogramm der molaren Massen erstellt werden und mit dem Paket "ggplotly" (https://www.rdocumentation.org/packages/plotly/versions/4.9.3/topics/ggplotly) wird der erstellte Plot interaktiv nutzbar:
+```{r}
+histogram <- ggplot(mass,aes(substance_mass))+
+  geom_histogram(binwidth=20,color="darkblue", fill="lightblue")+
+  labs(title="Histogram plot: Molar mass vs count",x="Exact mass (g/mol)", y = "Count")
+
+ggplotly(histogram)
 ```
 
-Beispiel-Plot eines hierarchischen Clusterings der Substanzen mit dem Paket 'metfRag'(https://github.com/ipb-halle/MetFragR):
-```{r clustering}
-
+Weiterhin kann ein hierarchischen Clusterings der Substanzen mit dem Paket 'metfRag'(https://github.com/ipb-halle/MetFragR) dargestellt werden. Diese Darstellung zeigt das Cluster von den Substanzen nach strukturellen Ähnlichkeiten:
+```{r}
+mols <- parse.smiles(smiles)
+dummy <- mapply(set.property, mols, "Score", c(1:2343))
+plotCluster(mols, h=0.2)
 ```
 
