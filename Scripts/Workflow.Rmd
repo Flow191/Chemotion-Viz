@@ -8,7 +8,7 @@ output:
 Aufgabe ist es aus der Chemotion Repository (https://www.chemotion-repository.net/welcome) alle bisher hinterlegten Substanzen zu klassifizieren und eine deskriptive Statistik des erhaltenen Datensatzes anzufertigen. Hierzu wird im Folgendem das verwendete R-Script beschrieben.
 Zunächst wird ein R-Skript mit den benötigten Helfer-Funktionen eingelesen, in der benötigte Funktionen ausgelagert werden, um die Vignette übersichtlicher zu gestalten. 
 ```{r}
-source("~/R/Chemotion/ChemotionViz/Scripts/viz-helper.R")
+source("../Scripts/viz-helper.R")
 ```
 
 Die benötigten Pakete müssen geladen werden:
@@ -31,9 +31,7 @@ library(metfRag)
 Die canonical smiles der Substanzen aus der Chemotion Repository (https://www.chemotion-repository.net/welcome) können als XLSX-Datei heruntergeladen werden. Hierfür muss ein Account auf der Homepage der Chemotion Repository angelegt werden. Unter dem Reiter "My DB" können unter "Chemotion" alle bisher eingetragenen Substanzen markiert und dann als XLSX-Datei exportiert werden. 
 In der heruntergeladenen XLSX-Datei befinden sich anschließend noch Duplikate, sowie Lösungsmittel (solvents) und Reaktionspartner (reactants). Nach Entfernung dieser Substanzen wird die XLSX-Datei in eine CSV-Datei konvertiert und kann dann in R eingelesen werden.
 ```{r}
-smiles <- as.character(read.csv("~/R/Chemotion/ChemotionViz/Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5])
-#smiles <- as.character(read.csv("~/R/Chemotion/ChemotionViz/Data/sample_export_test.csv")[ ,5])
-#smiles <- as.character(read.csv("../Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5])
+smiles <- as.character(read.csv("../Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5])
 head(smiles,3)
 ```
 
