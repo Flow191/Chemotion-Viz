@@ -20,7 +20,7 @@ library(metfRag)
 ##############################################################################
 
 # Einlesen der SMILES-Spalte aus CSV-Datei
-smiles <- read.csv("Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5]
+smiles <- as.character(read.csv("Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5])
 
 # Umwandlung von Smiles zu InChiKey
 inchikey <- sapply(smiles, get.inchi.key)
