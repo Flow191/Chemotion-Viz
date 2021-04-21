@@ -43,6 +43,7 @@ for (i in 1:length(Classification_List[])) {
 # Klassifikationen der Substanzen als Datenframe:
 char_list <-lapply(class, as.character)
 df <- plyr::ldply(char_list, rbind)
+#save.image(file = "classification_df.RData") 
 
 # Formatierung des Datenframes für den Sunburst-Plot:
 df$classes <- gsub('; NA','', paste(df$"1",df$"2",df$"3", df$"4", df$"5", df$"6", df$"7",df$"8" ,df$"9", sep = "; "))
