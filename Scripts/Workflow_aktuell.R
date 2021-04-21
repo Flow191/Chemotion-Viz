@@ -20,7 +20,7 @@ library(metfRag)
 ##############################################################################
 
 # Einlesen der SMILES-Spalte aus CSV-Datei
-smiles <- as.character(read.csv("Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5])
+smiles <- as.character(read.csv("Data/sample_export_16.03.2021_8.12_noDup.csv")[["canonical.smiles"]])
 
 # Umwandlung von Smiles zu InChiKey
 inchikey <- sapply(smiles, get.inchi.key)
@@ -41,13 +41,11 @@ for (i in 1:length(Classification_List[])) {
 }
 
 # Klassifikationen der Substanzen als Datenframe:
-df <- plyr::ldply(class, rbind)
-
-# Zeigt wie viele Substancen bis bestimmten Level klassifiziert wurden:
-# substances_per_class<- df[complete.cases(df$`7`), ]
+char_list <-lapply(class, as.character)
+df <- plyr::ldply(char_list, rbind)
 
 # Formatierung des Datenframes für den Sunburst-Plot:
-df$classes <- gsub('; NA','', paste(df$"1",df$"2",df$"3", df$"4", df$"5", df$"6", df$"7",df$"8" ,sep = "; "))
+df$classes <- gsub('; NA','', paste(df$"1",df$"2",df$"3", df$"4", df$"5", df$"6", df$"7",df$"8" ,df$"9", sep = "; "))
 df <-ddply(df,.(classes),summarize, count=length(classes) )
 df <- df[-1, ] 
 df$classes <- gsub('-','_',df$classes)

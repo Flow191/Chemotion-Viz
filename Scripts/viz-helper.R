@@ -17,5 +17,6 @@ for (i in 1:length(Classification_List[])) {
     class[i] <-as.data.frame(Classification_List[[i]]@classification[["Classification"]])
   }
 }
-df <- plyr::ldply(class, rbind)
+char_list <-lapply(class, as.character)
+df <- plyr::ldply(char_list, rbind)
 return(df)}

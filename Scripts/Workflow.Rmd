@@ -31,7 +31,7 @@ library(metfRag)
 Die canonical smiles der Substanzen aus der Chemotion Repository (https://www.chemotion-repository.net/welcome) können als XLSX-Datei heruntergeladen werden. Hierfür muss ein Account auf der Homepage der Chemotion Repository angelegt werden. Unter dem Reiter "My DB" können unter "Chemotion" alle bisher eingetragenen Substanzen markiert und dann als XLSX-Datei exportiert werden. 
 In der heruntergeladenen XLSX-Datei befinden sich anschließend noch Duplikate, sowie Lösungsmittel (solvents) und Reaktionspartner (reactants). Nach Entfernung dieser Substanzen wird die XLSX-Datei in eine CSV-Datei konvertiert und kann dann in R eingelesen werden.
 ```{r}
-smiles <- as.character(read.csv("../Data/sample_export_16.03.2021_8.12_noDup.csv")[ ,5])
+smiles <- as.character(read.csv("../Data/sample_export_16.03.2021_8.12_noDup.csv")[["canonical.smiles"]])
 head(smiles,3)
 ```
 
@@ -40,10 +40,10 @@ Mit dem Paket "rinchi" (https://rdrr.io/github/CDK-R/rinchi/man/getinchi.html#he
 inchikey <-sapply(smiles, get.inchi.key)
 ```
 
-Im nächsten Schritt werden die InChiKeys verwendet, um eine Klassifizierung der Substanzen durchzuführen. Die Klassifizierung erfolgt mit dem Paket "classyfireR" (https://github.com/aberHRML/classyfireR). Die Funktion "get_classification" erzeugt eine Klassifizierungsliste (JSON-Objekt). In dieser wird für jede Substanz ein Objekt welches Listen mit Tibbles enthält angelegt. Aus diesem Objekt können dann zum Beispiel Metadaten und die Klassifizierungstabelle ausgelesen werden (siehe folgende Ausgabe, Objekt 1). Für Substanzen die nicht klassifiziert werden konnten wird ein Objekt vom Typ "NULL" erzeugt (siehe folgende Ausgabe, Objekt 2+3).
+Im nächsten Schritt werden die InChiKeys verwendet, um eine Klassifizierung der Substanzen durchzuführen. Die Klassifizierung erfolgt mit dem Paket "classyfireR" (https://github.com/aberHRML/classyfireR). Die Funktion "get_classification" erzeugt ein JSON-Objekt für jede Substanz. Aus diesem Objekt können zum Beispiel Metadaten und die hierarchischen Klassifizierungsstufen ausgelesen werden. Für Substanzen die nicht klassifiziert werden konnten wird ein Objekt vom Typ "NULL" erzeugt.
 ```{r, message=FALSE}
 Classification_List <- sapply(inchikey, get_classification)
-head(Classification_List,3)
+head(Classification_List,1)
 ```
 
 Das erhaltene JSON Objekt aus ClassyfierR muss so formatiert werden, dass am Ende ein Datenframe mit der hierarischen Klassifizierung der Substanzen ausgestattet ist. Hierzu wurde eine Funktion classyfire2df() geschrieben, die als Eingabe die Classification_List und als Ausgabe einen Datenframe hat:
@@ -55,21 +55,23 @@ df
 
 Anzahl der zu klassifizierenden Substanzen aus der Chemotion Repository (Größe des Datensatzes):
 ```{r, echo=FALSE}
-nrow(df)
+count_substances <- nrow(df)
+count_substances
 ```
 
 In dem erzeugten Dataframe stehen in den Spalten der jeweilige Klassifizierungsgrad und in den Reihen die jeweilige Substanz. Im ersten Schritt wird eine neue Spalte "classes" erzeugt, in der alle Spalten mit den Klassifizierungsgraden einer Substanz zusammengefasst werden und mit einem Semikolon getrennt werden. Im nächsten Schritt werden alle SPalten, außer die "classes"-Spalte gelöscht und die hierarisch angelegten Substanzklassen nach Anzahl aufsummiert. Klassifizierungsgrade, die in ihrem Namen einen Bindestrich haben, werden im folgenden Sunburst-Plot nicht richtig geplotted, deshalb werden die Bindestriche in Unterstriche umgewandelt.
 ```{r}
-df$classes <- gsub('; NA','', paste(df$"1",df$"2",df$"3", df$"4", df$"5", df$"6", df$"7",df$"8" ,sep = "; "))
+df$classes <- gsub('; NA','', paste(df$"1",df$"2",df$"3", df$"4", df$"5", df$"6", df$"7",df$"8" ,df$"9" ,sep = "; "))
 df <-ddply(df,.(classes),summarize, count=length(classes) )
 df <- df[-1, ] 
 df$classes <- gsub('-','_',df$classes)
 df$classes <- gsub(';','-',df$classes)
 ```
 
-Anzahl der erfolgreich klassifizierten Substanzen aus der Chemotion Repository:
+Anzahl der erfolgreich klassifizierten Substanzen, sowie der nicht klassifizierbaren Substanzen aus der Chemotion Repository:
 ```{r, echo=FALSE}
 sum(df$count)
+count_substances-sum(df$count)
 ```
 
 Mithilfe dieses Data Frames kann die Darstellung des Klassifizierungslevel "class" aller klassifizierten Substanzen prozentual als Sunburst-Plot erfolgen. Die Erstellung des Sunburst Plots erfolgte mit dem Paket "sunburstR" (https://github.com/timelyportfolio/sunburstR)
@@ -99,5 +101,10 @@ Weiterhin kann ein hierarchischen Clusterings der Substanzen mit dem Paket 'metf
 mols <- parse.smiles(smiles)
 dummy <- mapply(set.property, mols, "Score", c(1:2343))
 plotCluster(mols, h=0.2)
+```
+
+Sessioninfo:
+```{r}
+sessionInfo()
 ```
 
