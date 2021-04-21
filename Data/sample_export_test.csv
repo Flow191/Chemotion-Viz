@@ -1,0 +1,10 @@
+residue_type,stereo_abs,stereo_rel,short label,canonical smiles,doi,url
+,,,ABB-1,NNc1ccc(cc1)Br.Cl,,
+,,,ABB-10,CC1=Nc2c(C1(C)C)cc(cc2)/C=C/C(C(C(C(C(C(C(F)(F)F)(F)F)(F)F)(F)F)(F)F)(F)F)(F)F,10.14272/ZUUYGWSDFRSKRQ-VOTSOKGWSA-N.1,https://dx.doi.org/10.14272/ZUUYGWSDFRSKRQ-VOTSOKGWSA-N.1
+,,,ABB-11,C[N+]1=C(C)C(c2c1ccc(c2)/C=C/C(C(C(C(F)(F)F)(F)F)(F)F)(F)F)(C)C.[I-],10.14272/SDCBGOXPGPFLQR-USRGLUTNSA-M,https://dx.doi.org/10.14272/SDCBGOXPGPFLQR-USRGLUTNSA-M
+,,,ABB-12,CC1=Nc2c(C1(C)C)cc(cc2)/C=C/C(C(C(C(F)(F)F)(F)F)(F)F)(F)F,,
+,,,ABB-13,C[N+]1=C(C)C(c2c1ccc(c2)/C=C/C(C(C(C(C(C(F)(F)F)(F)F)(F)F)(F)F)(F)F)(F)F)(C)C.[I-],10.14272/SYKRAWYPKJIMSD-USRGLUTNSA-M,https://dx.doi.org/10.14272/SYKRAWYPKJIMSD-USRGLUTNSA-M
+,,,ABB-14,CC1=Nc2c(C1(C)C)cc(cc2)/C=C/C(C(C(C(C(C(F)(F)F)(F)F)(F)F)(F)F)(F)F)(F)F,,
+,,,ABB-16,C[N+]1=C(C)C(c2c1ccc(c2)/C=C/C(C(C(C(C(C(C(F)(F)F)(F)F)(F)F)(F)F)(F)F)(F)F)(F)F)(C)C.[I-],10.14272/ZSDDWPUELQXIGH-BQYQJAHWSA-N.1,https://dx.doi.org/10.14272/ZSDDWPUELQXIGH-BQYQJAHWSA-N.1
+,,,ABB-17,ClC1=C(CCC/C/1=C\C=C/1\N(C)c2c(C1(C)C)cc(cc2)/C=C/C(C(C(C(F)(F)F)(F)F)(F)F)(F)F)/C=C/C1=[N+](C)c2c(C1(C)C)cc(cc2)/C=C/C(C(C(C(F)(F)F)(F)F)(F)F)(F)F.[Cl-],10.14272/WNUUONRSJXPAFK-RRCQUFFISA-M,https://dx.doi.org/10.14272/WNUUONRSJXPAFK-RRCQUFFISA-M
+,,,ABB-2,Brc1ccc2c(c1)C(C)(C)C(=N2)C,10.14272/OUWLZEOAVCFTAQ-UHFFFAOYSA-N.1,https://dx.doi.org/10.14272/OUWLZEOAVCFTAQ-UHFFFAOYSA-N.1
