@@ -46,15 +46,16 @@ for (i in 1:length(Classification_List[])) {
 char_list <-lapply(class, as.character)
 df <- plyr::ldply(char_list, rbind)
 #save.image(file = "classification_df_neu.RData") 
+#load("../ChemotionViz/classification_df_neu.RData")
 
 # Formatierung des Datenframes für den Sunburst-Plot:
 col_names <- rename(df, kingdom=1,superclass=2, class=3, subclass=4, level5=5,level6=6, level7=7,level8=8, level9=9)
 df <- col_names %>% dplyr::filter(!(kingdom==""))
-df <- df %>% dplyr::filter(!(kingdom=="Inorganic compounds"))
+#df <- df %>% dplyr::filter(!(kingdom=="Inorganic compounds"))
 
 #df$classes <- gsub('; NA','', paste(df$"superclass", sep = "; "))
-#df$classes <- gsub('; NA','', paste(df$"1",df$"2",df$"3", df$"4", df$"5", df$"6", df$"7",df$"8" ,df$"9", sep = "; "))
-df$classes <- gsub('; NA','', paste(df$"superclass",df$"class", df$"subclass", df$"level5", df$"level6", df$"level7",df$"level8" ,df$"level9", sep = "; "))
+df$classes <- gsub('; NA','', paste(df$"kingdom",df$"superclass",df$"class", df$"subclass", df$"level5", df$"level6", df$"level7",df$"level8" ,df$"level9", sep = "; "))
+#df$classes <- gsub('; NA','', paste(df$"superclass",df$"class", df$"subclass", df$"level5", df$"level6", df$"level7",df$"level8" ,df$"level9", sep = "; "))
 df <-ddply(df,.(classes),summarize, size=length(classes) )
 #sum(df$size)
 

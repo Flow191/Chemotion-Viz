@@ -29,7 +29,6 @@ library(data.table)
 library(treemap)
 ```
 
-
 Die canonical smiles der Substanzen aus der Chemotion Repository (https://www.chemotion-repository.net/welcome) können als XLSX-Datei heruntergeladen werden. Hierfür muss ein Account auf der Homepage der Chemotion Repository angelegt werden. Unter dem Reiter "My DB" können unter "Chemotion" alle bisher eingetragenen Substanzen markiert und dann als XLSX-Datei exportiert werden. 
 In der heruntergeladenen XLSX-Datei befinden sich anschließend noch Duplikate, sowie Lösungsmittel (solvents) und Reaktionspartner (reactants). Nach Entfernung dieser Substanzen wird die XLSX-Datei in eine CSV-Datei konvertiert und kann dann in R eingelesen werden.
 ```{r}
@@ -55,6 +54,7 @@ df <- classyfire2df()
 df
 ```
 
+
 Anzahl der zu klassifizierenden Substanzen aus der Chemotion Repository (Größe des Datensatzes):
 ```{r, echo=FALSE}
 count_substances <- nrow(df)
@@ -65,8 +65,7 @@ In dem erzeugten Dataframe stehen in den Spalten der jeweilige Klassifizierungsg
 ```{r}
 col_names <- rename(df, kingdom=1,superclass=2, class=3, subclass=4, level5=5,level6=6, level7=7,level8=8, level9=9)
 df <- col_names %>% dplyr::filter(!(kingdom==""))
-df <- df %>% dplyr::filter(!(kingdom=="Inorganic compounds"))
-df$classes <- gsub('; NA','', paste(df$"superclass",df$"class", df$"subclass", df$"level5", df$"level6", df$"level7",df$"level8" ,df$"level9", sep = "; "))
+df$classes <- gsub('; NA','', paste(df$"kingdom",df$"superclass",df$"class", df$"subclass", df$"level5", df$"level6", df$"level7",df$"level8" ,df$"level9", sep = "; "))
 df <-ddply(df,.(classes),summarize, size=length(classes) )
 ```
 
