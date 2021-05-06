@@ -5,6 +5,7 @@ library(classyfireR)
 library(plyr)
 library(dplyr)
 library(data.table)
+library(sunburstR)
 
 data <- read.csv("Data/reaction_export_30.04_0932.csv")
 df <- data %>% dplyr::filter(!(type=="")) %>% 
@@ -64,41 +65,8 @@ dt2 <- setDF(data.table(df_products[,2]))
 dt1$V2 <- dt2$V1
 
 same_class <- dt1[which(dt1$V1 == dt1$V2), ]
+same_classes <-ddply(same_class,.(V1,V2),summarize, size=length(V1) )
+
 different_class <- dt1[which(dt1$V1 != dt1$V2), ]
+different_classes <-ddply(different_class,.(V1,V2),summarize, size=length(V1) )
 
-
-
-################################
-
-dt1$V3 <- NULL
-dt1[dt1$V1 == dt1$V2,"V3"] <- "h"
-df[df$x1 < df$x2,"winner"] <- "d"
-
-
-
-
-u <- rbind(dt1,dt2)
-new_dataset <- dt1 %>% right_join(dt2,by=c("V1"))
-dd <- merge(dt1$"V1",dt2$"V1",all= TRUE)
-
-s <- all.equal(df_start_mats[,2],df_products[,2])
-newdata <- setdiff(df_start_mats, df_products)
-#dd <- df_start_mats[df_products[,2],2]
-
-
-library(sqldf)
-a1NotIna2 <- sqldf('SELECT * FROM df_start_mats$2 EXCEPT SELECT * FROM df_products$2')
-
-library(compare)
-h <- compare(df_start_mats$`2`,df_products$`2`,allowAll=TRUE)
-
-library(arsenal)
-tt <- summary(comparedf(df_start_mats, df_products))
-
-
-################
-d <- df %>%
-  slice(which(row_number() %% 2 == 1))
-d2 <- df %>%
-  slice(which(row_number() %% 1))
-d2 <- df %>% anti_join(., d,na_matches=c("never"))
