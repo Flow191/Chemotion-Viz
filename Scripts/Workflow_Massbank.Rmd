@@ -109,31 +109,6 @@ bar <- ggplot(bar_func(),aes(size,reorder(classes, size, sum)))+
 ggplotly(bar)
 ```
 
-
-Neben der Darstellung der prozentualen Anteile der Substanzklassen können mithilfe des Paketes "rcdk" (https://cran.r-project.org/web/packages/rcdk/index.html) die molaren Massen der Substanzen aus den canonical smiles berechnet werden. Der erstellte Dataframe zeigt die ersten drei Substanzen aus dem Datensatz mit der jeweiligen exakten molaren Masse [g/mol] an.
-```{r, include=FALSE, error=TRUE}
-substance_mass <- sapply(smiles, smiles2mass)
-df_mass <- data.frame(substance_mass)
-mass <- data.frame(substance= row.names(df_mass), df_mass, row.names=NULL)
-head(mass,3)
-```
-
-Mit dem Paket "ggplot2" (https://www.rdocumentation.org/packages/ggplot2/versions/3.3.3) kann ein Histogramm der molaren Massen erstellt werden und mit dem Paket "ggplotly" (https://www.rdocumentation.org/packages/plotly/versions/4.9.3/topics/ggplotly) wird der erstellte Plot interaktiv nutzbar:
-```{r, include=FALSE, error=TRUE}
-histogram <- ggplot(mass,aes(substance_mass))+
-  geom_histogram(binwidth=20,color="darkblue", fill="lightblue")+
-  labs(title="Histogram plot: Molar mass vs count",x="Exact mass (g/mol)", y = "Count")
-
-ggplotly(histogram)
-```
-
-Weiterhin kann ein hierarchischen Clusterings der Substanzen mit dem Paket 'metfRag'(https://github.com/ipb-halle/MetFragR) dargestellt werden. Diese Darstellung zeigt das Cluster von den Substanzen nach strukturellen Ähnlichkeiten:
-```{r, include=FALSE, error=TRUE}
-mols <- parse.smiles(smiles)
-dummy <- mapply(set.property, mols, "Score", c(1:2343))
-plotCluster(mols, h=0.2)
-```
-
 Sessioninfo:
 ```{r}
 sessionInfo()
