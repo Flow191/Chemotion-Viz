@@ -6,6 +6,8 @@ library(plyr)
 library(dplyr)
 library(data.table)
 library(sunburstR)
+library(ggplot2)
+library(networkD3)
 
 data <- read.csv("Data/reaction_export_30.04_0932.csv")
 df <- data %>% dplyr::filter(!(type=="")) %>% 
@@ -70,3 +72,62 @@ same_classes <-ddply(same_class,.(V1,V2),summarize, size=length(V1) )
 different_class <- dt1[which(dt1$V1 != dt1$V2), ]
 different_classes <-ddply(different_class,.(V1,V2),summarize, size=length(V1) )
 
+#save.image(file = "reactions.RData") 
+#load("../ChemotionViz/reactions.RData")
+
+colnames(different_classes) <- c("source", "target", "value")
+different_classes$target <- paste0(different_classes$target, '.')
+
+# From these flows we need to create a node data frame: it lists every entities involved in the flow
+
+nodes <- data.frame(
+  name=c(as.character(different_classes$source), as.character(different_classes$target)) %>% unique()
+)
+
+# With networkD3, connection must be provided using id, not using real name like in the links dataframe.. So we need to reformat it.
+different_classes$IDsource <- match(different_classes$source, nodes$name)-1
+different_classes$IDtarget <- match(different_classes$target, nodes$name)-1
+
+
+ColourScal ='d3.scaleOrdinal() .range(["#FDE725FF","#B4DE2CFF","#6DCD59FF","#35B779FF","#1F9E89FF","#26828EFF","#31688EFF","#3E4A89FF","#482878FF","#440154FF"])'
+# Make the Network
+p <- sankeyNetwork(Links = different_classes, Nodes = nodes,
+                   Source = "IDsource", Target = "IDtarget",
+                   Value = "value", NodeID = "name",sinksRight=FALSE,colourScale=ColourScal,nodeWidth=40,fontSize=13)
+p
+
+############
+#rownames(different_classes)[rownames(different_classes) == "Benzenoids"] = "Benzenoids_"
+#different_classes <- subset(different_classes, source %in% c("Benzenoids_"))
+#different_classes$IDtarget <- c(1:length(different_classes$target))
+
+fig <- plot_ly(
+  type = "sankey",
+  orientation = "h",
+  
+  node = list(
+    label = c("Benzenoids",different_classes$target),
+    color = c("#7fc97f","#beaed4","#fdc086","#ffff99","#386cb0","#f0027f","#bf5b17","#666666"),
+    pad = 15,
+    thickness = 20,
+    line = list(
+      color = "black",
+      width = 0.5
+    )
+  ),
+  
+  link = list(
+    source = different_classes$IDsource,
+    target = different_classes$IDtarget,
+    value =  different_classes$value
+  )
+)
+fig <- fig %>% layout(
+  title = "Basic Sankey Diagram",
+  font = list(
+    size = 10
+  )
+)
+
+fig
+###########
