@@ -1,12 +1,9 @@
 library(readr)
-library(rinchi)
 library(magrittr)
 library(classyfireR)
 library(plyr)
 library(dplyr)
 library(data.table)
-library(sunburstR)
-library(ggplot2)
 library(networkD3)
 
 data <- read.csv("Data/reaction_export_30.04_0932.csv")
@@ -21,14 +18,12 @@ more_start_mats <- df %>% slice(starting_mats(type))
 one_start_mat <- df %>% anti_join(., more_start_mats)
 one_start_mats <- one_start_mat[-c(51:53,80:82,325:327), ] 
 
-start_mats <- one_start_mats %>% dplyr::filter(!(type=="")) %>% 
-  dplyr::filter(!(type=="3 solvent")) %>% dplyr::filter(!(type=="2 reactant")) %>% 
+start_mats <- one_start_mats %>% 
   dplyr::filter(!(type=="4 product"))
-#start_mats[5]
-write.csv(products[5],"Data/test2.csv", row.names = FALSE)
 
-products <- one_start_mats %>% dplyr::filter(!(type=="")) %>% 
-  dplyr::filter(!(type=="3 solvent")) %>% dplyr::filter(!(type=="2 reactant")) %>% 
+nrow(start_mats)
+
+products <- one_start_mats %>% 
   dplyr::filter(!(type=="1 starting mat"))
 
 
@@ -61,6 +56,7 @@ char_list <-lapply(class, as.character)
 char_list2 <-lapply(class2, as.character)
 df_start_mats <- plyr::ldply(char_list, rbind)
 df_products <- plyr::ldply(char_list2, rbind)
+sum(df_products$"1"!="")
 
 dt1 <- setDF(data.table(df_start_mats[,2]))
 dt2 <- setDF(data.table(df_products[,2]))
@@ -68,9 +64,11 @@ dt1$V2 <- dt2$V1
 
 same_class <- dt1[which(dt1$V1 == dt1$V2), ]
 same_classes <-ddply(same_class,.(V1,V2),summarize, size=length(V1) )
+sum(same_classes$size)
 
 different_class <- dt1[which(dt1$V1 != dt1$V2), ]
 different_classes <-ddply(different_class,.(V1,V2),summarize, size=length(V1) )
+sum(different_classes$size)
 
 #save.image(file = "reactions.RData") 
 #load("../ChemotionViz/reactions.RData")

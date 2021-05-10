@@ -1,0 +1,125 @@
+---
+title: "Chemotion-Viz-Reactions"
+author: "Florian Schmidt"
+date: "10 5 2021"
+output: html_document
+---
+
+Aufgabe ist es aus der Chemotion Repository (https://www.chemotion-repository.net/welcome) alle bisher hinterlegten Reaktionen zu klassifizieren, um anschließend sagen zu können wie sich die Klassen zwischen Edukten und Produkten verändert haben. Hierzu wird im Folgendem das verwendete R-Script beschrieben. Es wurden Daten von insgesamt 624 Reaktionen aus der Chemotion Repository am 30.04.2021 um 9:32 Uhr heruntergeladen.
+
+Zunächst wird ein R-Skript mit den benötigten Helfer-Funktionen eingelesen, in der benötigte Funktionen ausgelagert werden, um die Vignette übersichtlicher zu gestalten. 
+```{r}
+source("../Scripts/viz-helper.R")
+```
+
+Die benötigten Pakete müssen geladen werden:
+```{r, message=FALSE}
+library(readr)
+library(magrittr)
+library(classyfireR)
+library(plyr)
+library(dplyr)
+library(data.table)
+library(networkD3)
+```
+
+Einlesen der CSV-Datei mit den Reaktionen und herausfiltern der nicht benötigten Zeilen:
+```{r}
+data <- read.csv("../Data/reaction_export_30.04_0932.csv")
+df <- data %>% dplyr::filter(!(type=="")) %>% 
+  dplyr::filter(!(type=="3 solvent")) %>% dplyr::filter(!(type=="2 reactant"))
+```
+
+Im nächsten Schritt wird der Datensatz so formatiert, dass nur die Reaktionen in denen aus ein Edukt ein Produkt entsteht übrig bleiben. Dieser Datensatz wird dann anschließend in zwei Dataframes gesplittet, einen mit den Edukten und einen mit den Produkten.
+```{r, message=FALSE}
+more_start_mats <- df %>% slice(starting_mats(type))
+one_start_mat <- df %>% anti_join(., more_start_mats)
+one_start_mats <- one_start_mat[-c(51:53,80:82,325:327), ] 
+
+start_mats <- one_start_mats %>%  
+  dplyr::filter(!(type=="4 product"))
+
+products <- one_start_mats %>% 
+  dplyr::filter(!(type=="1 starting mat"))
+```
+
+Anzahl der Edukte und Produkte der zu analysierenden Reaktionen vor der Klassifizierung. Die Anzahl ist gleich, da nur Reaktionen mit einem Edukt und einem Produkt untersucht werden. Die Anzahl ist daher gleich der Anzahl der Reaktionen.
+```{r}
+nrow(start_mats)
+nrow(products)
+```
+
+
+Im nächsten Schritt werden die InChiKeys verwendet, um eine Klassifizierung der Substanzen aus den Reaktionen durchzuführen. Die Klassifizierung erfolgt mit dem Paket "classyfireR" (https://github.com/aberHRML/classyfireR). Die Funktion "get_classification" erzeugt ein JSON-Objekt für jede Substanz. Aus diesem Objekt können zum Beispiel Metadaten und die hierarchischen Klassifizierungsstufen ausgelesen werden. Für Substanzen die nicht klassifiziert werden konnten wird ein Objekt vom Typ "NULL" erzeugt.
+```{r, message=FALSE}
+Classification_List_start_mats <- sapply(start_mats$InChI, get_classification)
+head(Classification_List_start_mats,1)
+Classification_List_products <- sapply(products$InChI, get_classification)
+head(Classification_List_products,1)
+```
+
+Das erhaltene JSON Objekt aus ClassyfierR muss so formatiert werden, dass am Ende ein Datenframe mit der hierarischen Klassifizierung der Substanzen ausgestattet ist. Hierzu wurde eine Funktion classyfire2df() geschrieben, die als Eingabe die Classification_List und als Ausgabe einen Datenframe hat:
+```{r, results='hide'}
+class <- vector("character", length(Classification_List_start_mats[]))
+df_start_mats <- classyfire2df_e()
+head(df_start_mats,3)
+class2 <- vector("character", length(Classification_List_products[]))
+df_products <- classyfire2df_p()
+head(df_products,3)
+```
+
+Anzahl der Reaktionen, in denen die Substanzklassifikation erfolgreich war:
+```{r}
+sum(df_products$"1"!="")
+```
+
+
+Die Daten der Ergebnisse der Klassifizierung werden im nächsten Schritt so vorbereitet, dass am Ende ein Dataframe mit den Klassen der Edukten und Produkten mit der dazugehörigen Anzahl entsteht. 
+```{r}
+dt1 <- setDF(data.table(df_start_mats[,2]))
+dt2 <- setDF(data.table(df_products[,2]))
+dt1$V2 <- dt2$V1
+
+same_class <- dt1[which(dt1$V1 == dt1$V2), ]
+same_classes <-ddply(same_class,.(V1,V2),summarize, size=length(V1) )
+
+different_class <- dt1[which(dt1$V1 != dt1$V2), ]
+different_classes <-ddply(different_class,.(V1,V2),summarize, size=length(V1) )
+```
+
+Anzahl der Reaktionen in der sich die Substanzklasse nicht verändert bzw. verändert hat:
+```{r}
+sum(same_classes$size)
+sum(different_classes$size)
+```
+
+
+Der vorbereitete Datenframe kann nun genutzt werden, um einen Sankey-Plot erstellen zu können. Hierfür werden dem Datenframe noch ID's zu den Klassen der Edukte und Produkte zugeordnet, auf die die folgende Funktion aus dem paket networkD3 (https://christophergandrud.github.io/networkD3/) zugreift. 
+```{r}
+colnames(different_classes) <- c("source", "target", "value")
+different_classes$target <- paste0(different_classes$target, '.')
+
+nodes <- data.frame(
+  name=c(as.character(different_classes$source), as.character(different_classes$target)) %>% unique()
+)
+
+different_classes$IDsource <- match(different_classes$source, nodes$name)-1
+different_classes$IDtarget <- match(different_classes$target, nodes$name)-1
+
+
+ColourScal ='d3.scaleOrdinal() .range(["#FDE725FF","#B4DE2CFF","#6DCD59FF","#35B779FF","#1F9E89FF","#26828EFF","#31688EFF","#3E4A89FF","#482878FF","#440154FF"])'
+
+p <- sankeyNetwork(Links = different_classes, Nodes = nodes,
+                   Source = "IDsource", Target = "IDtarget",
+                   Value = "value", NodeID = "name",sinksRight=FALSE,colourScale=ColourScal,nodeWidth=40,fontSize=13)
+```
+
+In dem erstellten Sankey-Plot befinden sich auf der linken Seite die Substanzklassen der Edukte und auf der rechten Seite die Substanzklassen der Produkte, in denen sich die Edukte nach der Reaktion umgewandelt haben.
+```{r}
+p
+```
+
+Sessioninfo:
+```{r}
+sessionInfo()
+```
