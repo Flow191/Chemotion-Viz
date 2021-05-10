@@ -5,7 +5,7 @@ library("devtools")
 
 install.packages(c("readr", "magrittr",
 	"plyr", "dplyr", "sunburstR", "Rcpp", "ggplot2", "plotly", 
-	"rmarkdown", "knitr", "remotes","rcdk","data.table","treemap"))
+	"rmarkdown", "knitr", "remotes","rcdk","data.table","treemap","networkD3"))
 
 
 ## Bioc
