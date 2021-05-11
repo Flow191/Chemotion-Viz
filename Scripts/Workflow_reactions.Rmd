@@ -21,6 +21,8 @@ library(plyr)
 library(dplyr)
 library(data.table)
 library(networkD3)
+library(ggplot2)
+library(plotly)
 ```
 
 Einlesen der CSV-Datei mit den Reaktionen und herausfiltern der nicht benötigten Zeilen:
@@ -58,17 +60,15 @@ Classification_List_products <- sapply(products$InChI, get_classification)
 head(Classification_List_products,1)
 ```
 
-Das erhaltene JSON Objekt aus ClassyfierR muss so formatiert werden, dass am Ende ein Datenframe mit der hierarischen Klassifizierung der Substanzen ausgestattet ist. Hierzu wurde eine Funktion classyfire2df() geschrieben, die als Eingabe die Classification_List und als Ausgabe einen Datenframe hat:
+Das erhaltene JSON Objekt aus ClassyfierR muss so formatiert werden, dass am Ende ein Datenframe mit der hierarischen Klassifizierung der Substanzen ausgestattet ist. Hierzu wurde eine Funktion classyfire2df_e() bzw. classyfire2df_p() geschrieben, die als Eingabe die Classification_List und als Ausgabe einen Datenframe für die Edukte bzw. Produkte hat.
 ```{r, results='hide'}
 class <- vector("character", length(Classification_List_start_mats[]))
 df_start_mats <- classyfire2df_e()
-head(df_start_mats,3)
 class2 <- vector("character", length(Classification_List_products[]))
 df_products <- classyfire2df_p()
-head(df_products,3)
 ```
 
-Anzahl der Reaktionen, in denen die Substanzklassifikation erfolgreich war:
+Anzahl der Reaktionen, in denen die Substanzklassifikation erfolgreich war (Substanzklasse konnte bei Edukt und Produkt ermittelt werden):
 ```{r}
 sum(df_products$"1"!="")
 ```
@@ -85,18 +85,31 @@ same_classes <-ddply(same_class,.(V1,V2),summarize, size=length(V1) )
 
 different_class <- dt1[which(dt1$V1 != dt1$V2), ]
 different_classes <-ddply(different_class,.(V1,V2),summarize, size=length(V1) )
+colnames(different_classes) <- c("source", "target", "value")
+head(different_classes,9)
 ```
 
 Anzahl der Reaktionen in der sich die Substanzklasse nicht verändert bzw. verändert hat:
 ```{r}
 sum(same_classes$size)
-sum(different_classes$size)
+sum(different_classes$value)
+```
+
+In der folgenden Abbildung wird die Größe des Datensatzes einmal mittels Barplot besser dargestellt. Es können insgesamt 172 von 624 Reaktionen bezüglich der Änderung der Klasse vor und nach der Reaktion ausgewertet werden.
+```{r}
+reactions <- data.frame (value  = c(624,nrow(products),sum(df_products$"1"!=""),sum(same_classes$size),sum(different_classes$value)),
+                  reactions = c("all","one educt/product","one educt/product (classified)","one educt/product (classified) same_class","one educt/product (classified) different_class"))
+
+o <- ggplot(reactions,aes(reactions,value))+
+  geom_col(fill="darkblue")+
+  aes(stringr::str_wrap(reactions, 15), value)+
+  xlab("reactions")
+ggplotly(o)
 ```
 
 
 Der vorbereitete Datenframe kann nun genutzt werden, um einen Sankey-Plot erstellen zu können. Hierfür werden dem Datenframe noch ID's zu den Klassen der Edukte und Produkte zugeordnet, auf die die folgende Funktion aus dem paket networkD3 (https://christophergandrud.github.io/networkD3/) zugreift. 
 ```{r}
-colnames(different_classes) <- c("source", "target", "value")
 different_classes$target <- paste0(different_classes$target, '.')
 
 nodes <- data.frame(

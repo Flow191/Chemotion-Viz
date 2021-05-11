@@ -5,6 +5,8 @@ library(plyr)
 library(dplyr)
 library(data.table)
 library(networkD3)
+library(ggplot2)
+library(plotly)
 
 data <- read.csv("Data/reaction_export_30.04_0932.csv")
 df <- data %>% dplyr::filter(!(type=="")) %>% 
@@ -69,6 +71,17 @@ sum(same_classes$size)
 different_class <- dt1[which(dt1$V1 != dt1$V2), ]
 different_classes <-ddply(different_class,.(V1,V2),summarize, size=length(V1) )
 sum(different_classes$size)
+
+
+
+reactions <- data.frame (value  = c(624,nrow(products),sum(df_products$"1"!=""),sum(same_classes$size),sum(different_classes$size)),
+                  reactions = c("all","one educt/product","one educt/product (classified)","one educt/product (classified) same_class","one educt/product (classified) different_class"))
+
+o <- ggplot(reactions,aes(reactions,value))+
+  geom_col(fill="darkblue")+
+  aes(stringr::str_wrap(reactions, 15), value)+
+  xlab("reactions")
+ggplotly(o)
 
 #save.image(file = "reactions.RData") 
 #load("../ChemotionViz/reactions.RData")
