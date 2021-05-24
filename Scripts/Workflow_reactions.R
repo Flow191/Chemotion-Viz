@@ -7,6 +7,7 @@ library(data.table)
 library(networkD3)
 library(ggplot2)
 library(plotly)
+library(writexl)
 
 data <- read.csv("Data/reaction_export_30.04_0932.csv")
 df <- data %>% dplyr::filter(!(type=="")) %>% 
@@ -60,8 +61,9 @@ df_start_mats <- plyr::ldply(char_list, rbind)
 df_products <- plyr::ldply(char_list2, rbind)
 sum(df_products$"1"!="")
 
-dt1 <- setDF(data.table(df_start_mats[,2]))
-dt2 <- setDF(data.table(df_products[,2]))
+# 2 für superclass, 3 für class
+dt1 <- setDF(data.table(df_start_mats[,3]))
+dt2 <- setDF(data.table(df_products[,3]))
 dt1$V2 <- dt2$V1
 
 same_class <- dt1[which(dt1$V1 == dt1$V2), ]
@@ -72,8 +74,24 @@ different_class <- dt1[which(dt1$V1 != dt1$V2), ]
 different_classes <-ddply(different_class,.(V1,V2),summarize, size=length(V1) )
 sum(different_classes$size)
 
+# create dataframe with smiles of educts/products
 
+smiles_start_mats <- cbind(df_start_mats, start_mats[, 5]) 
+smiles_start_mats <- rename(smiles_start_mats, class_edukt=3,SMILES_edukt="start_mats[, 5]")
+smiles_start_mats <- subset(smiles_start_mats, select=c("class_edukt", "SMILES_edukt"))
 
+smiles_products <- cbind(df_products, products[, 5]) 
+smiles_products <- rename(smiles_products, class_product=3,SMILES_product="products[, 5]")
+smiles_products <- subset(smiles_products, select=c("class_product", "SMILES_product"))
+
+smiles_mats <- cbind(smiles_start_mats,smiles_products)
+smiles_mats <- na.omit(smiles_mats)
+smiles_mats <- smiles_mats[which(smiles_mats$class_edukt != smiles_mats$class_product), ]
+smiles_mats <- smiles_mats[with(smiles_mats, order(class_edukt)), ]
+
+write_xlsx(smiles_mats,"Data/SMILES_reactions.xlsx")
+
+# barplot
 reactions <- data.frame (value  = c(624,nrow(products),sum(df_products$"1"!=""),sum(same_classes$size),sum(different_classes$size)),
                   reactions = c("all","one educt/product","one educt/product (classified)","one educt/product (classified) same_class","one educt/product (classified) different_class"))
 
@@ -99,12 +117,12 @@ nodes <- data.frame(
 different_classes$IDsource <- match(different_classes$source, nodes$name)-1
 different_classes$IDtarget <- match(different_classes$target, nodes$name)-1
 
-
-ColourScal ='d3.scaleOrdinal() .range(["#FDE725FF","#B4DE2CFF","#6DCD59FF","#35B779FF","#1F9E89FF","#26828EFF","#31688EFF","#3E4A89FF","#482878FF","#440154FF"])'
+#ColourScal ='d3.scaleOrdinal() .range(["#FDE725FF","#B4DE2CFF","#6DCD59FF","#35B779FF","#1F9E89FF","#26828EFF","#31688EFF","#3E4A89FF","#482878FF","#440154FF"])'
+ColourScal ='d3.scaleOrdinal() .range(["#FDE725FF","#B4DE2CFF","#6DCD59FF","#35B779FF","#1F9E89FF","#26828EFF","#31688EFF","#3E4A89FF","#482878FF","#440154FF","#FDE725FF","#B4DE2CFF","#6DCD59FF","#35B779FF","#1F9E89FF","#26828EFF","#31688EFF","#3E4A89FF","#482878FF","#440154FF","#FDE725FF","#B4DE2CFF","#6DCD59FF"])'
 # Make the Network
 p <- sankeyNetwork(Links = different_classes, Nodes = nodes,
                    Source = "IDsource", Target = "IDtarget",
-                   Value = "value", NodeID = "name",sinksRight=FALSE,colourScale=ColourScal,nodeWidth=40,fontSize=13)
+                   Value = "value", NodeID = "name",sinksRight=FALSE,colourScale = ColourScal,nodeWidth=40,fontSize=13)
 p
 
 ############
